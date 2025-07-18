@@ -1,1 +1,1 @@
-web: gunicorn ShikshaAi.wsgi:application
+web: gunicorn WellMindAi.wsgi:application
