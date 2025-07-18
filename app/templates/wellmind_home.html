@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WellMind AI – Mental Wellness Buddy</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f6f8fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 400px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            padding: 2rem 1.5rem 1.5rem 1.5rem;
+        }
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #2d3748;
+            text-align: center;
+        }
+        textarea {
+            width: 100%;
+            min-height: 80px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            padding: 0.75rem;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            resize: vertical;
+        }
+        button {
+            width: 100%;
+            background: #4f8cff;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:active, button:hover {
+            background: #2563eb;
+        }
+        .response {
+            margin-top: 1.5rem;
+            background: #f1f5f9;
+            border-radius: 8px;
+            padding: 1rem;
+            min-height: 80px;
+        }
+        .label {
+            font-weight: bold;
+            color: #2563eb;
+        }
+        @media (max-width: 500px) {
+            .container {
+                max-width: 98vw;
+                padding: 1rem 0.5rem 1rem 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>WellMind AI</h1>
+        <textarea id="userInput" placeholder="How are you feeling today?"></textarea>
+        <button id="analyzeBtn">Analyze Mood</button>
+        <div class="response" id="aiResponse">
+            <span style="color:#888;">Your AI buddy's response will appear here.</span>
+        </div>
+    </div>
+    <script>
+        document.getElementById('analyzeBtn').addEventListener('click', async function() {
+            const userInput = document.getElementById('userInput').value.trim();
+            const responseDiv = document.getElementById('aiResponse');
+            if (!userInput) {
+                responseDiv.innerHTML = '<span style="color:red;">Please enter your feelings above.</span>';
+                return;
+            }
+            responseDiv.innerHTML = 'Analyzing...';
+            try {
+                const res = await fetch('/analyze-mood/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: userInput })
+                });
+                const data = await res.json();
+                if (data.error) {
+                    responseDiv.innerHTML = `<span style='color:red;'>${data.error}</span>`;
+                } else if (data.mood && data.quote && data.tip) {
+                    responseDiv.innerHTML = `
+                        <div><span class='label'>Mood:</span> ${data.mood}</div>
+                        <div><span class='label'>Quote:</span> "${data.quote}"</div>
+                        <div><span class='label'>Tip:</span> ${data.tip}</div>
+                    `;
+                } else if (data.raw) {
+                    responseDiv.innerHTML = `<pre>${data.raw}</pre>`;
+                } else {
+                    responseDiv.innerHTML = '<span style="color:red;">Unexpected response from AI.</span>';
+                }
+            } catch (err) {
+                responseDiv.innerHTML = `<span style='color:red;'>Error: ${err}</span>`;
+            }
+        });
+    </script>
+</body>
+</html> 
